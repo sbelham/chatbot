@@ -8,20 +8,20 @@ from langchain_core.messages import AIMessage, HumanMessage
 st.set_page_config(page_title="Chatbot", page_icon="🤖")
 st.title("🤖")
 
+with st.sidebar:
+    modelo = st.selectbox(
+        "Selecciona el modelo de Gemini (para respuestas más rápidas, usa gemini-2.5-flash-lite)",
+        ("gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite"),
+    )
+    st.write("Modelo seleccionado:", modelo)
 
-modelo = st.selectbox(
-    "Selecciona el modelo de Gemini (para respuestas más rápidas, usa gemini-2.5-flash-lite)",
-    ("gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite"),
-)
-st.write("Modelo seleccionado:", modelo)
-
-temperatura = st.slider(
-    "Temperatura (controla la creatividad de las respuestas. Valor más alto = respuestas más creativas, más bajo = respuestas más centradas)",
-    min_value=0.0,
-    max_value=2.0,
-    value=0.9,  # default value
-    step=0.1
-)
+    temperatura = st.slider(
+        "Temperatura (controla la creatividad de las respuestas. Valor más alto = respuestas más creativas, más bajo = respuestas más centradas)",
+        min_value=0.0,
+        max_value=2.0,
+        value=0.9,  # default value
+        step=0.1
+    )
 
 google_api_key = st.text_input("Clave API", type="password")
 if not google_api_key:
