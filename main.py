@@ -1,6 +1,7 @@
 import streamlit as st
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import AIMessage, HumanMessage
+import time
 
 #google_api_key = st.secrets["google"]["api_key"]
 
@@ -54,7 +55,9 @@ if not google_api_key:
     st.info("Añade tu clave API de Gemini para continuar: ", icon="🗝️")
 else:
 
-    chat_model = ChatGoogleGenerativeAI(model=modelo,temperature=temperatura,api_key=google_api_key,top_k=top_k_param,top_p=top_p_param,max_output_tokens=max_tokens_param)
+    chat_model = ChatGoogleGenerativeAI(model=modelo,temperature=temperatura,api_key=google_api_key,
+                                        top_k=top_k_param,top_p=top_p_param,max_output_tokens=max_tokens_param,
+                                        streaming=True)
 
     # Inicializar el historial de mensajes en session_state
     if "mensajes" not in st.session_state:
@@ -81,10 +84,12 @@ else:
         respuesta = chat_model.invoke(st.session_state.mensajes)
 
         with st.chat_message("assistant"):
-            st.markdown(respuesta.content)
+            respuesta = st.write_stream(
+                chat_model.stream(st.session_state.mensajes)  
+            )
 
-        st.session_state.mensajes.append(respuesta)
+        st.session_state.mensajes.append(AIMessage(content=respuesta))
 
     if st.button("Limpiar chat"): #Limpia el chat y los mensajes guardados en sesion
         st.session_state.mensajes = [] # st.session_state.conversation = None
-        st.rerun()  
+        st.rerun()
