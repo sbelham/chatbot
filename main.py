@@ -8,7 +8,12 @@ from langchain_core.messages import AIMessage, HumanMessage
 st.set_page_config(page_title="Chatbot", page_icon="🤖")
 st.title("🤖")
 
-#st.button("Limpiar chat")
+
+modelo = st.selectbox(
+    "Selecciona el modelo de Gemini (para respuestas más rápidas, usa gemini-2.5-flash-lite)",
+    ("gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite"),
+)
+st.write("Modelo seleccionado:", modelo)
 
 temperatura = st.slider(
     "Temperatura (controla la creatividad de las respuestas. Valor más alto = respuestas más creativas, más bajo = respuestas más centradas)",
@@ -23,7 +28,7 @@ if not google_api_key:
     st.info("Añade tu clave API de Gemini para continuar: ", icon="🗝️")
 else:
 
-    chat_model = ChatGoogleGenerativeAI(model="gemini-2.5-flash",temperature=temperatura,api_key=google_api_key)
+    chat_model = ChatGoogleGenerativeAI(model=modelo,temperature=temperatura,api_key=google_api_key)
 
     # Inicializar el historial de mensajes en session_state
     if "mensajes" not in st.session_state:
@@ -54,6 +59,6 @@ else:
 
         st.session_state.mensajes.append(respuesta)
 
-    if st.button("Limpiar chat"):
+    if st.button("Limpiar chat"): #Limpia el chat y los mensajes guardados en sesion
         st.session_state.mensajes = [] # st.session_state.conversation = None
         st.rerun()  
