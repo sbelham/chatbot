@@ -22,13 +22,39 @@ with st.sidebar:
         value=0.9,  # default value
         step=0.1
     )
+    top_k = st.slider(
+        "Top K (selecciona las palabras con las probabilidades más altas para ser la siguiente palabra. 0 = valor por defecto del modelo)",
+        min_value=0.0,
+        max_value=100.0,
+        value=0.0,  # default value
+        step=1.0
+    )
+    top_p = st.slider(
+        "Top P (un valor bajo selecciona solo las palabras más probables, mientras que un valor alto permite mayor variabilidad. 0 = valor por defecto del modelo)",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.0,  # default value
+        step=0.01
+    )
+    max_tokens = st.slider(
+        "Tokens máximos (número máximo de tokens para cada respuesta. 0 = valor por defecto del modelo)",
+        min_value=0.0,
+        max_value=1000.0,
+        value=0.0,  # default value
+        step=1.0
+    )
+
+    top_k_param = None if top_k == 0 else top_k
+    top_p_param = None if top_p == 0.0 else top_p
+    max_tokens_param = None if max_tokens == 0.0 else max_tokens
+
 
 google_api_key = st.text_input("Clave API", type="password")
 if not google_api_key:
     st.info("Añade tu clave API de Gemini para continuar: ", icon="🗝️")
 else:
 
-    chat_model = ChatGoogleGenerativeAI(model=modelo,temperature=temperatura,api_key=google_api_key)
+    chat_model = ChatGoogleGenerativeAI(model=modelo,temperature=temperatura,api_key=google_api_key,top_k=top_k_param,top_p=top_p_param,max_output_tokens=max_tokens_param)
 
     # Inicializar el historial de mensajes en session_state
     if "mensajes" not in st.session_state:
