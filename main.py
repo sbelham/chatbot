@@ -19,13 +19,7 @@ with st.sidebar:
 
     modo = st.selectbox(
         "Modo de respuesta",
-        (
-            "Normal",
-            "Formal",
-            "Modo profesor",
-            "Chistoso",
-            "Poético"
-        )
+        ("Normal","Formal","Modo profesor","Chistoso","Poético")
     )
 
     temperatura = st.slider(
