@@ -1,7 +1,8 @@
 import streamlit as st
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import AIMessage, HumanMessage
-import time
+from langchain_core.messages import SystemMessage
+from utils import *
 
 #google_api_key = st.secrets["google"]["api_key"]
 
@@ -15,6 +16,17 @@ with st.sidebar:
         ("gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite"),
     )
     st.write("Modelo seleccionado:", modelo)
+
+    modo = st.selectbox(
+        "Modo de respuesta",
+        (
+            "Normal",
+            "Formal",
+            "Modo profesor",
+            "Chistoso",
+            "Poético"
+        )
+    )
 
     temperatura = st.slider(
         "Temperatura (controla la creatividad de las respuestas. Valor más alto = respuestas más creativas, más bajo = respuestas más centradas)",
@@ -49,10 +61,17 @@ with st.sidebar:
     top_p_param = None if top_p == 0.0 else top_p
     max_tokens_param = None if max_tokens == 0.0 else max_tokens
 
+prompt_modo = modo_a_prompt(modo)
+
+# Store/update system message
+if "system_message" not in st.session_state:
+    st.session_state.system_message = SystemMessage(content=prompt_modo)
+else:
+    st.session_state.system_message.content = prompt_modo
 
 google_api_key = st.text_input("Clave API", type="password")
 if not google_api_key:
-    st.info("Añade tu clave API de Gemini para continuar: ", icon="🗝️")
+    st.info("Añade tu clave API de Gemini para continuar ", icon="🗝️")
 else:
 
     chat_model = ChatGoogleGenerativeAI(model=modelo,temperature=temperatura,api_key=google_api_key,
@@ -81,14 +100,17 @@ else:
         
         st.session_state.mensajes.append(HumanMessage(content=pregunta))
 
-        respuesta = chat_model.invoke(st.session_state.mensajes)
+        mensajes_para_gemini = [
+            st.session_state.system_message, 
+            *st.session_state.mensajes        
+        ]
 
         with st.chat_message("assistant"):
-            respuesta = st.write_stream(
-                chat_model.stream(st.session_state.mensajes)  
+            streamed_text = st.write_stream(
+                chat_model.stream(mensajes_para_gemini)
             )
 
-        st.session_state.mensajes.append(AIMessage(content=respuesta))
+        st.session_state.mensajes.append(AIMessage(content=streamed_text))
 
     if st.button("Limpiar chat"): #Limpia el chat y los mensajes guardados en sesion
         st.session_state.mensajes = [] # st.session_state.conversation = None
